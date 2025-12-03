@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+
+  # ============================
+  # NGINX Reverse Proxy (Public)
+  # ============================
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    depends_on:
+      - analytics-service
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  # ============================
+  # ORDER PRODUCER
+  # ============================
+  order-producer:
+    image: aisalkyn85/order-producer:latest
+    container_name: order-producer
+    environment:
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      ORDERS_TOPIC: ${ORDERS_TOPIC}
+      ORDER_PRODUCER_INTERVAL_SECONDS: ${ORDER_PRODUCER_INTERVAL_SECONDS}
+
+  # ============================
+  # FRAUD SERVICE
+  # ============================
+  fraud-service:
+    image: aisalkyn85/fraud-service:latest
+    container_name: fraud-service
+    environment:
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      ORDERS_TOPIC: ${ORDERS_TOPIC}
+      FRAUD_AMOUNT_THRESHOLD: ${FRAUD_AMOUNT_THRESHOLD}
+      FRAUD_RISKY_COUNTRIES: ${FRAUD_RISKY_COUNTRIES}
+
+  # ============================
+  # PAYMENT SERVICE
+  # ============================
+  payment-service:
+    image: aisalkyn85/payment-service:latest
+    container_name: payment-service
+    environment:
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      ORDERS_TOPIC: ${ORDERS_TOPIC}
+      PAYMENTS_TOPIC: ${PAYMENTS_TOPIC}
+
+  # ============================
+  # ANALYTICS SERVICE
+  # ============================
+  analytics-service:
+    image: aisalkyn85/analytics-service:latest
+    container_name: analytics-service
+    environment:
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      ORDERS_TOPIC: ${ORDERS_TOPIC}
+      ORDER_ANALYTICS_TOPIC: ${ORDER_ANALYTICS_TOPIC}
+      ANALYTICS_PRINT_EVERY: ${ANALYTICS_PRINT_EVERY}
+      COUCHBASE_HOST: ${COUCHBASE_HOST}
+      COUCHBASE_BUCKET: ${COUCHBASE_BUCKET}
+      COUCHBASE_USERNAME: ${COUCHBASE_USERNAME}
+      COUCHBASE_PASSWORD: ${COUCHBASE_PASSWORD}
+

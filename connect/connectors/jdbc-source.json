@@ -1,0 +1,16 @@
+{
+  "name": "postgres-orders-source",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "1",
+    "connection.url": "jdbc:postgresql://postgres:5432/orders_db",
+    "connection.user": "orders_user",
+    "connection.password": "orders_pass",
+    "mode": "incrementing",
+    "incrementing.column.name": "id",
+    "table.whitelist": "public.legacy_orders",
+    "topic.prefix": "postgres-",
+    "poll.interval.ms": "2000"
+  }
+}
+
