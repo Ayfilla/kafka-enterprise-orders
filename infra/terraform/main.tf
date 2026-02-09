@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.5"
 
   backend "local" {
     path = "terraform.tfstate"
@@ -8,7 +8,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.40"
+      version = "~> 5.0"
     }
   }
 }
@@ -18,31 +18,27 @@ provider "aws" {
 }
 
 module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.5.0"
+  source = "./vpc"
 
-  name = "orders-vpc"
-  cidr = "10.0.0.0/16"
-
-  azs             = ["${var.region}a", "${var.region}b"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
-  public_subnets  = ["10.0.11.0/24", "10.0.12.0/24"]
-
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+  vpc_cidr        = var.vpc_cidr
+  azs             = var.azs
+  public_subnets  = var.public_subnets
+  private_subnets = var.private_subnets
 }
 
-output "vpc_id" {
-  value = module.vpc.vpc_id
+module "rds" {
+  source = "./rds"
+
+  vpc_id     = module.vpc.vpc_id
+  subnets    = module.vpc.private_subnets_ids
+  username   = var.db_username
+  password   = var.db_password
 }
 
-output "private_subnets" {
-  value = module.vpc.private_subnets
-}
+module "ecs" {
+  source = "./ecs"
 
-output "public_subnets" {
-  value = module.vpc.public_subnets
+  vpc_id     = module.vpc.vpc_id
+  subnets    = module.vpc.public_subnets_ids
 }
 

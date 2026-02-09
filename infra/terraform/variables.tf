@@ -1,22 +1,21 @@
-variable "region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-2"
+variable "project" { type = string }
+
+variable "region" { type = string }
+
+variable "vpc_cidr" { type = string }
+
+variable "azs" {
+  type = list(string)
 }
 
-variable "db_username" {
-  type      = string
-  sensitive = true
+variable "public_subnets" {
+  type = list(string)
 }
 
-variable "db_password" {
-  type      = string
-  sensitive = true
+variable "private_subnets" {
+  type = list(string)
 }
 
-variable "kafka_bootstrap" {
-  description = "Kafka bootstrap server"
-  type        = string
-  default     = "kafka:9092"
-}
+variable "db_username" { type = string }
+variable "db_password" { type = string }
 
